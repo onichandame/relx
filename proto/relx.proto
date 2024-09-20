@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package relx;
+
+service RelxQueryer {
+  // Check if the statement (<user> is <relation> of <object>) is true
+  rpc Exist(Tuple) returns (ExistResponse) {}
+  // Stream all users who have <relation> of <object>
+  rpc StreamUsers(ListUserRequest) returns (stream Entity) {}
+  // Stream all objects that are connected to <user> by <relation>
+  rpc StreamObjects(ListObjectRequest) returns (stream Entity) {}
+}
+
+service RelxManager {
+  // Create new tuples
+  rpc CreateTuples(stream Tuple) returns (Empty) {}
+  rpc DeleteTuples(stream Tuple) returns (Empty) {}
+}
+
+message ListUserRequest {
+  Entity object = 1;
+  string relation = 2;
+  // Max depth to search
+  int32 depth = 3;
+}
+
+message ListObjectRequest {
+  Entity user = 1;
+  string relation = 2;
+  // Max depth to search
+  int32 depth = 3;
+}
+
+message ExistResponse { bool exist = 1; }
+
+message Tuple {
+  Entity user = 1;
+  string relation = 2;
+  Entity object = 3;
+}
+
+message Entity {
+  string namespace = 1;
+  string name = 2;
+}
+
+message Empty {}
