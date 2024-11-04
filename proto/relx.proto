@@ -4,44 +4,58 @@ package relx;
 
 service RelxQueryer {
   // Check if the statement (<user> is <relation> of <object>) is true
-  rpc Exist(Tuple) returns (ExistResponse) {}
-  // Stream all users who have <relation> of <object>
-  rpc StreamUsers(ListUserRequest) returns (stream Entity) {}
+  rpc Check(Tuple) returns (CheckResponse);
+  // Stream all subjects who have <relation> of <object>
+  rpc ReadSubject(ReadSubjectRequest) returns (stream Entity);
   // Stream all objects that are connected to <user> by <relation>
-  rpc StreamObjects(ListObjectRequest) returns (stream Entity) {}
+  rpc StreamObject(ReadObjectRequest) returns (stream Entity);
 }
 
 service RelxManager {
   // Create new tuples
-  rpc CreateTuples(stream Tuple) returns (Empty) {}
-  rpc DeleteTuples(stream Tuple) returns (Empty) {}
+  rpc CreateRelations(stream Tuple) returns (Empty);
+  rpc DeleteRelations(stream Tuple) returns (Empty);
 }
 
-message ListUserRequest {
+message ReadSubjectRequest {
   Entity object = 1;
   string relation = 2;
   // Max depth to search
   int32 depth = 3;
 }
 
-message ListObjectRequest {
+message ReadObjectRequest {
   Entity user = 1;
   string relation = 2;
   // Max depth to search
   int32 depth = 3;
 }
 
-message ExistResponse { bool exist = 1; }
-
-message Tuple {
-  Entity user = 1;
+message CheckRequest {
+  Entity subject = 1;
   string relation = 2;
   Entity object = 3;
 }
 
+message CheckResponse { bool exist = 1; }
+
+message Tuple {
+  Entity object = 1;
+  optional string relation = 2;
+  oneof user {
+    Entity single = 3;
+    UserSet userSet = 4;
+  };
+}
+
+message UserSet {
+  Entity object = 1;
+  string relation = 2;
+}
+
 message Entity {
-  string namespace = 1;
-  string name = 2;
+  optional string namespace = 1;
+  optional string name = 2;
 }
 
 message Empty {}
